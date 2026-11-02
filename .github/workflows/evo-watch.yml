@@ -1,0 +1,93 @@
+# Watches chatwoot/chatwoot for a new release. It never touches production: it only
+#   1. tries to put the fork's patch on top of the new release (a throwaway branch candidate/<version>),
+#   2. builds a candidate image from it,
+#   3. opens an issue (GitHub e-mails the owner) saying whether it applied cleanly or conflicted.
+name: Watch upstream
+
+on:
+  schedule:
+    - cron: '17 9 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  actions: write
+  packages: write
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      OWNER: ${{ github.repository_owner }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: evolution
+          fetch-depth: 0
+
+      - name: Look for a new release
+        id: rel
+        run: |
+          current=$(cat .evo/UPSTREAM)
+          latest=$(gh api repos/chatwoot/chatwoot/releases/latest --jq .tag_name)
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "latest=$latest" >> "$GITHUB_OUTPUT"
+          if [ "$current" = "$latest" ]; then echo "new=no" >> "$GITHUB_OUTPUT"; exit 0; fi
+          # one issue per release: already announced?
+          if gh issue list --repo "${{ github.repository }}" --state all --search "Chatwoot $latest in:title" --json number --jq 'length' | grep -qv '^0$'; then
+            echo "new=no" >> "$GITHUB_OUTPUT"
+          else
+            echo "new=yes" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Try the patch on the new release
+        if: steps.rel.outputs.new == 'yes'
+        id: try
+        run: |
+          set -u
+          git config user.name  "evo-watch"
+          git config user.email "evo-watch@users.noreply.github.com"
+          git remote add upstream https://github.com/chatwoot/chatwoot.git
+          git fetch --no-tags upstream "refs/tags/${{ steps.rel.outputs.latest }}:refs/tags/${{ steps.rel.outputs.latest }}" "refs/tags/${{ steps.rel.outputs.current }}:refs/tags/${{ steps.rel.outputs.current }}"
+          git checkout -q -b "candidate/${{ steps.rel.outputs.latest }}" evolution
+          if git rebase --onto "${{ steps.rel.outputs.latest }}" "${{ steps.rel.outputs.current }}" > rebase.log 2>&1; then
+            echo "${{ steps.rel.outputs.latest }}" > .evo/UPSTREAM
+            git add .evo/UPSTREAM
+            git commit -q -m "chore: base ${{ steps.rel.outputs.latest }}"
+            git push -f origin "candidate/${{ steps.rel.outputs.latest }}"
+            echo "clean=yes" >> "$GITHUB_OUTPUT"
+          else
+            git rebase --abort || true
+            echo "clean=no" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Announce
+        if: steps.rel.outputs.new == 'yes'
+        run: |
+          latest="${{ steps.rel.outputs.latest }}"
+          notes="https://github.com/chatwoot/chatwoot/releases/tag/$latest"
+          if [ "${{ steps.try.outputs.clean }}" = "yes" ]; then
+            body="@${OWNER} saiu o Chatwoot **$latest** (você usa ${{ steps.rel.outputs.current }}). Notas: $notes
+
+          ✅ Nosso patch (card Evolution + assistente de QR) aplicou **sem conflito** na branch \`candidate/$latest\`. Estou compilando a imagem candidata \`ghcr.io/${OWNER}/chatwoot:candidate-$latest\`; o resultado aparece neste mesmo chamado.
+
+          **A produção não foi alterada.** Para atualizar, é só pedir: faço o backup do banco, troco a versão e testo, e dá para voltar à anterior."
+          else
+            body="@${OWNER} saiu o Chatwoot **$latest** (você usa ${{ steps.rel.outputs.current }}). Notas: $notes
+
+          ⚠️ Nosso patch **não aplicou limpo** nessa versão (conflito). Log:
+
+          \`\`\`
+          $(tail -n 25 rebase.log)
+          \`\`\`
+
+          **A produção não foi alterada.** Vou precisar ajustar o patch antes de atualizar."
+          fi
+          url=$(gh issue create --repo "${{ github.repository }}" --title "Chatwoot $latest disponível" --body "$body")
+          echo "$url"
+          num="${url##*/}"
+          if [ "${{ steps.try.outputs.clean }}" = "yes" ]; then
+            gh workflow run evo-build.yml --repo "${{ github.repository }}" -f ref="candidate/$latest" -f tag="candidate-$latest" -f issue="$num"
+          fi
