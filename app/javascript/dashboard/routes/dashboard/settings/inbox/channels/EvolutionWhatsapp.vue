@@ -21,6 +21,7 @@ const tr = (ptText, enText) => (pt.value ? ptText : enText);
 
 const step = ref('name'); // name | qr | done
 const inboxName = ref('');
+const importHistory = ref(true);
 const busy = ref(false);
 const instance = ref('');
 const webhookUrl = ref('');
@@ -109,7 +110,10 @@ const start = async () => {
   error.value = '';
   busy.value = true;
   try {
-    const { data } = await axios.post(`${BRIDGE}/instances`, { name });
+    const { data } = await axios.post(`${BRIDGE}/instances`, {
+      name,
+      import_history: importHistory.value,
+    });
     instance.value = data.instance;
     webhookUrl.value = data.webhook_url;
     showQr(data);
@@ -168,6 +172,20 @@ const progress = computed(() => Math.max(0, Math.min(1, secondsLeft.value / 45))
         :placeholder="tr('Ex.: Atendimento', 'E.g. Support')"
         @keyup.enter="start"
       />
+      <label class="flex items-start gap-2 mb-4 text-sm text-n-slate-12">
+        <input v-model="importHistory" type="checkbox" class="mt-1" />
+        <span>
+          {{ tr('Importar contatos e histórico de conversas', 'Import contacts and chat history') }}
+          <span class="block text-xs text-n-slate-11">
+            {{
+              tr(
+                'O WhatsApp só entrega o histórico na hora de ler o QR Code, então esta escolha precisa ser feita agora.',
+                'WhatsApp only hands over the history while linking, so this has to be chosen now.'
+              )
+            }}
+          </span>
+        </span>
+      </label>
       <p v-if="error" class="mb-3 text-sm text-n-ruby-11">{{ error }}</p>
       <NextButton
         :is-loading="busy"
