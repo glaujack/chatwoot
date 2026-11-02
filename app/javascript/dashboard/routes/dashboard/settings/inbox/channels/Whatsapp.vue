@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n, I18nT } from 'vue-i18n';
 import Twilio from './Twilio.vue';
 import ThreeSixtyDialogWhatsapp from './360DialogWhatsapp.vue';
+import EvolutionWhatsapp from './EvolutionWhatsapp.vue'; // fork patch
 import CloudWhatsapp from './CloudWhatsapp.vue';
 import WhatsappManualSetup from './WhatsappManualSetup.vue';
 import WhatsappEmbeddedSignup from './WhatsappEmbeddedSignup.vue';
@@ -33,6 +34,7 @@ const PROVIDER_TYPES = {
   WHATSAPP_EMBEDDED: 'whatsapp_embedded',
   WHATSAPP_MANUAL: 'whatsapp_manual',
   THREE_SIXTY_DIALOG: '360dialog',
+  EVOLUTION: 'evolution', // fork patch
 };
 
 const hasWhatsappAppId = computed(() => {
@@ -89,6 +91,14 @@ const availableProviders = computed(() => [
     title: t('INBOX_MGMT.ADD.WHATSAPP.PROVIDERS.TWILIO'),
     description: t('INBOX_MGMT.ADD.WHATSAPP.PROVIDERS.TWILIO_DESC'),
     icon: 'i-woot-twilio',
+  },
+  // fork patch: WhatsApp through an Evolution API server (QR code)
+  {
+    key: PROVIDER_TYPES.EVOLUTION,
+    title: 'Evolution',
+    description:
+      'Conecte um número de WhatsApp lendo um QR Code, sem a API oficial da Meta.',
+    icon: 'i-woot-whatsapp',
   },
 ]);
 
@@ -266,6 +276,9 @@ const requestEmbeddedSignupAccess = () => {
         />
         <ThreeSixtyDialogWhatsapp
           v-else-if="selectedProvider === PROVIDER_TYPES.THREE_SIXTY_DIALOG"
+        />
+        <EvolutionWhatsapp
+          v-else-if="selectedProvider === PROVIDER_TYPES.EVOLUTION"
         />
         <CloudWhatsapp v-else />
       </div>
