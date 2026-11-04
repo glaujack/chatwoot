@@ -129,6 +129,7 @@ export default {
     'selectWhatsappTemplate',
     'selectContentTemplate',
     'requestContactInfoTemplate',
+    'openSchedule',
   ],
   setup(props) {
     const { setSignatureFlagForInbox, fetchSignatureFlagFromUISettings } =
@@ -383,7 +384,16 @@ export default {
         @click="toggleInsertArticle"
       />
     </div>
-    <div class="right-wrap">
+    <div class="right-wrap gap-2">
+      <NextButton
+        v-if="!isEditorDisabled && !isNote"
+        v-tooltip.top-end="'Agendar mensagem'"
+        icon="i-ph-clock"
+        slate
+        faded
+        sm
+        @click="$emit('openSchedule')"
+      />
       <NextButton
         :label="sendButtonText"
         type="submit"

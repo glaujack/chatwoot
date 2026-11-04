@@ -1,0 +1,10 @@
+json.id scheduled_message.id
+json.conversation_id scheduled_message.conversation.display_id
+json.contact_name scheduled_message.conversation.contact&.name
+json.content scheduled_message.content
+json.scheduled_at scheduled_message.next_run_at.to_i
+json.recurrence scheduled_message.recurrence
+json.time_zone scheduled_message.time_zone
+json.status scheduled_message.status
+json.last_run_at scheduled_message.last_run_at&.to_i
+json.last_error scheduled_message.last_error

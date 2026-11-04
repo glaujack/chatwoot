@@ -8,6 +8,12 @@ dispatch_conversation_monitors_job:
   class: 'Internal::DispatchConversationMonitorsJob'
   queue: scheduled_jobs
 
+# sends the scheduled messages (and repeats) that have come due
+scheduled_messages_dispatch_job:
+  cron: '* * * * *'
+  class: 'ScheduledMessages::DispatchJob'
+  queue: scheduled_jobs
+
 # executed daily at 0000 UTC; schedules deferred jobs at stable times for each installation
 internal_check_new_versions_job:
   cron: '0 0 * * *'

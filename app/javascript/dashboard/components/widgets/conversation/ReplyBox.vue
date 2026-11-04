@@ -25,6 +25,7 @@ import { BUS_EVENTS } from 'shared/constants/busEvents';
 import { CMD_AI_ASSIST } from 'dashboard/helper/commandbar/events';
 import { getUndefinedVariablesInMessage } from '@chatwoot/utils';
 import WhatsappTemplates from './WhatsappTemplates/Modal.vue';
+import ScheduleMessageModal from './ScheduleMessageModal.vue';
 import ContentTemplates from './ContentTemplates/ContentTemplatesModal.vue';
 import { MESSAGE_MAX_LENGTH } from 'shared/helpers/MessageTypeHelper';
 import { isComposing } from 'shared/helpers/KeyboardHelpers';
@@ -79,6 +80,7 @@ export default {
     ReplyTopPanel,
     ContentTemplates,
     WhatsappTemplates,
+    ScheduleMessageModal,
     WootMessageEditor,
     QuotedEmailPreview,
     CopilotEditorSection,
@@ -183,6 +185,7 @@ export default {
       showWhatsAppTemplatesModal: false,
       requestContactInfoTemplatesOnly: false,
       showContentTemplatesModal: false,
+      showScheduleModal: false,
       updateEditorSelectionWith: '',
       undefinedVariableMessage: '',
       showMentions: false,
@@ -1543,8 +1546,16 @@ export default {
         @select-content-template="openContentTemplateModal"
         @toggle-insert-article="toggleInsertArticle"
         @request-contact-info-template="openContactInfoTemplateModal"
+        @open-schedule="showScheduleModal = true"
       />
     </Transition>
+
+    <ScheduleMessageModal
+      :show="showScheduleModal"
+      :conversation-id="conversationId"
+      :message="message"
+      @close="showScheduleModal = false"
+    />
 
     <WhatsappTemplates
       :inbox-id="inbox.id"

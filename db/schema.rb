@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_10_19_143116) do
+ActiveRecord::Schema[7.1].define(version: 2026_11_04_153742) do
   # These extensions should be enabled to support this database
   enable_extension "pg_stat_statements"
   enable_extension "pg_trgm"
@@ -1629,6 +1629,26 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_19_143116) do
     t.index ["account_id", "date", "dimension_type", "dimension_id", "metric"], name: "index_rollup_unique_key", unique: true
     t.index ["account_id", "dimension_type", "date"], name: "index_rollup_summary"
     t.index ["account_id", "metric", "date"], name: "index_rollup_timeseries"
+  end
+
+  create_table "scheduled_messages", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "conversation_id", null: false
+    t.bigint "user_id", null: false
+    t.text "content", null: false
+    t.datetime "next_run_at", null: false
+    t.integer "recurrence", default: 0, null: false
+    t.string "time_zone", default: "UTC", null: false
+    t.integer "status", default: 0, null: false
+    t.integer "attempts", default: 0, null: false
+    t.datetime "last_run_at"
+    t.string "last_error"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_scheduled_messages_on_account_id"
+    t.index ["conversation_id"], name: "index_scheduled_messages_on_conversation_id"
+    t.index ["status", "next_run_at"], name: "index_scheduled_messages_on_status_and_next_run_at"
+    t.index ["user_id"], name: "index_scheduled_messages_on_user_id"
   end
 
   create_table "sla_events", force: :cascade do |t|
