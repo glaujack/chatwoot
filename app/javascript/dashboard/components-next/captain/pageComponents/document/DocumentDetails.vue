@@ -141,14 +141,14 @@ const updatedAtLabel = computed(() => {
   if (!documentDetails.value?.updated_at) return null;
   return messageTimestamp(
     documentDetails.value.updated_at,
-    'MMM d, yyyy h:mm a'
+    'MMM d, yyyy HH:mm'
   );
 });
 const syncedAtLabel = computed(() => {
   if (!documentDetails.value?.last_synced_at) return null;
   return messageTimestamp(
     documentDetails.value.last_synced_at,
-    'MMM d, yyyy h:mm a'
+    'MMM d, yyyy HH:mm'
   );
 });
 

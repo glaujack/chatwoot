@@ -77,14 +77,14 @@ const formatSnoozeDate = (snoozeDate, currentDate, locale = 'en') => {
       month: 'short',
       hour: 'numeric',
       minute: '2-digit',
-      hour12: true,
+      hour12: false,
       ...(sameYear ? {} : { year: 'numeric' }),
     };
     return new Intl.DateTimeFormat(locale, opts).format(snoozeDate);
   } catch {
     return sameYear
-      ? format(snoozeDate, 'EEE, d MMM, h:mm a')
-      : format(snoozeDate, 'EEE, d MMM yyyy, h:mm a');
+      ? format(snoozeDate, 'EEE, d MMM, HH:mm')
+      : format(snoozeDate, 'EEE, d MMM yyyy, HH:mm');
   }
 };
 

@@ -18,7 +18,7 @@ const { canViewAnalytics } = useCampaignAnalytics();
 const { accountScopedRoute } = useAccount();
 const exactTimestamp = useExactTimestamp();
 const sentAt = computed(() =>
-  messageTimestamp(props.recipient.sent_at, 'LLL d, h:mm a')
+  messageTimestamp(props.recipient.sent_at, 'LLL d, HH:mm')
 );
 const statusLabel = computed(
   () =>

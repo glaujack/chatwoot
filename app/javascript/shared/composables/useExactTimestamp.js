@@ -11,6 +11,7 @@ const formatterFor = locale => {
       new Intl.DateTimeFormat(locale, {
         dateStyle: 'medium',
         timeStyle: 'short',
+        hourCycle: 'h23',
         // `fa` and `th` would otherwise use the Solar Hijri and Buddhist
         // calendars, dating this differently to the relative time it annotates.
         calendar: 'gregory',

@@ -130,7 +130,7 @@ const groups = computed(() => groupByDay(props.notes, 'createdAt', t));
                 </button>
                 <span class="flex items-center gap-1.5 text-xs text-n-slate-10">
                   <span class="leading-4 tabular-nums">
-                    {{ dateFormat(note.createdAt, 'h:mm a') }}
+                    {{ dateFormat(note.createdAt, 'HH:mm') }}
                   </span>
                   <template v-if="note.contact">
                     <span class="rounded-full size-1 bg-n-slate-8" />

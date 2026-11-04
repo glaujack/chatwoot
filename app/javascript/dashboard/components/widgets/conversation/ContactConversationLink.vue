@@ -56,7 +56,7 @@ const tooltip = computed(() =>
       name:
         props.conversation.meta?.sender?.name ||
         t('CONVERSATION.CONTACT_HISTORY.CUSTOMER'),
-      time: dateFormat(props.conversation.created_at, 'MMM d, yyyy · h:mm a'),
+      time: dateFormat(props.conversation.created_at, 'MMM d, yyyy · HH:mm'),
     }
   )
 );
